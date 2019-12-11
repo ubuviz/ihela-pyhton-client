@@ -25,7 +25,7 @@ iHela_TOKEN_URL = "oAuth2/token/"
 iHela_AUTH_URL = "oAuth2/authorize/"
 
 
-iHela_ENDPOINTS = {"USER_INFO": "api/v1/user/"}
+iHela_ENDPOINTS = {"USER_INFO": "api/v1/connected-user/"}
 
 
 class Client(object):
@@ -45,7 +45,9 @@ class Client(object):
 
     def get_response(self, resp):
         try:
-            return resp.json()
+            resp_json = resp.json()
+            logger.debug(resp_json)
+            return resp_json
         except json.decoder.JSONDecodeError:
             logger.error(resp.text)
             return None
@@ -54,9 +56,12 @@ class Client(object):
         return self.ihela_base_url + str(url)
 
     def get_auth_headers(self):
-        return {
-            "Authorization": "%s %s" % (self.auth_token_object["token_type"], self.auth_token_object["access_token"])
-        }
+        if self.is_authenticated():
+            return {
+                "Authorization": "%s %s"
+                % (self.auth_token_object["token_type"], self.auth_token_object["access_token"])
+            }
+        return {}
 
     def get_authorization_url(self, redirect_uri, scope=None, response_type=None, state_=None):
         if not scope:
@@ -72,32 +77,35 @@ class Client(object):
         if not self.state:
             self.state = "".join(secrets.choice(chars) for _ in range(20))
 
-        auth_parms = urllib.parse.urlencode(
-            dict(
-                scope=scope,
-                state=self.state,  # Generate Random
-                response_type=response_type,
-                client_id=self.client_id,
-                redirect_uri=urllib.parse.quote(redirect_uri),
-            )
+        auth_dict = dict(
+            scope=scope,
+            state=self.state,  # Generate Random
+            response_type=response_type,
+            client_id=self.client_id,
+            redirect_uri=urllib.parse.quote(redirect_uri),
+        )
+        # auth_parms = urllib.parse.urlencode(auth_dict)
+        auth_parms = "scope={scope}&state={state}&response_type={response_type}&client_id={client_id}&redirect_uri={redirect_uri}".format(
+            **auth_dict
         )
 
-        return requests.utils.requote_uri(self.get_url(iHela_AUTH_URL) + "?" + auth_parms)
+        # return requests.utils.requote_uri(self.get_url(iHela_AUTH_URL) + "?" + auth_parms)
+        return self.get_url(iHela_AUTH_URL) + "?" + auth_parms
 
     def authenticate(self, authorization_code, redirect_uri):
-        url = iHela_AUTH_URL
-        auth_ = requests.post(
-            self.get_url(url),
-            data={
-                "grant_type": "authorization_code",
-                "code": authorization_code,
-                "client_id": self.client_id,
-                "client_secret": self.client_secret,
-                "redirect_uri": redirect_uri,
-                # "username": username,
-                # "password": password,
-            },
-        )
+        url = iHela_TOKEN_URL
+        url_data = {
+            "grant_type": "authorization_code",
+            "code": authorization_code,
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+            "redirect_uri": redirect_uri,
+            # "username": username,
+            # "password": password,
+        }
+
+        logger.debug(url_data)
+        auth_ = requests.post(self.get_url(url), data=url_data)
         self.auth_token_object = self.get_response(auth_)
 
         self.get_user_info()
@@ -134,7 +142,9 @@ class Client(object):
     #     return access_token
 
     def is_authenticated(self):
-        return self.auth_token_object is not None
+        if isinstance(self.auth_token_object, dict) and self.auth_token_object.get("access_token", None):
+            return True
+        return False
 
     def get_user_info(self):
         if self.is_authenticated():
