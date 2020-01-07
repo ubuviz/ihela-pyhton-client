@@ -9,7 +9,7 @@ Get started
 
 1. Install the package with ``pip install ihela-python-client``
 2. import the package for using the provided functions to communicate with the iHela API
-:: pyhton
+.. code-block :: pyhton
 
    from ihela_client.client import Client 
 
