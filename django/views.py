@@ -17,19 +17,26 @@ class iHelaClientBaseView(OAuth2View):
 
         if request.method == "GET":
             return self.get(request, *args, **kwargs)
+        elif request.method == "POST":
+            return self.post(request, *args, **kwargs)
         else:
             pass
             # Raise Method Not Allowed
 
     def get_client(self):
-    	cl = iHelaAPIClient(
+        cl = iHelaAPIClient(
             self.client.consumer_key,
             self.client.consumer_secret,
             state=self.client.state,
             test=TEST_ENV,
             ihela_url=settings.OAUTH_IHELA_SERVER_BASEURL + "/",
         )
-        absolute_auth_redirect_uri = request.build_absolute_uri(self.request.path)
+
+        return cl
+
+    @property
+    def get_absolute_url(self):
+        return request.build_absolute_uri(self.request.path)
 
 
 class iHelaClientCodeView(iHelaClientBaseView):
