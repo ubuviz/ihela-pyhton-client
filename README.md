@@ -18,10 +18,14 @@ redirect_uri = "https://yourapp.com/uri/to/redirect/to/"
 
 auth_url = cl.get_authorization_url(redirect_uri)
 ```
-The `redirect_uri` must be registered with the client to be used.
-3. Redirect to the returned `auth_url` : This will allow the user to login in the iHela website and allow your application with an authorization code. After login, the user will be redirect to the given `redirect_uri`.
-4. The `redirect_uri` must handle the received authorization code and pass to the authenticate url : 
+The `redirect_uri` must be registered with the client created by iHela both for test and production.
+3. Redirect to the returned `auth_url`: This will allow the user to authorize your application to access the iHela website banking operations and will redirect to your `redirect_uri` with an authorization code passed as GET method parameter.
+4. The `redirect_uri` must handle the received authorization code and pass to the authenticate url like this :  
 ``` python
+# Get the authorization code
+# For example in django : authorization_code_received = request.GET.get("code")
+
+# Then call the authenticate method
 cl.authenticate(authorization_code=auth_code_received)
 
 # To verifiy that the user is well authenticated :
