@@ -2,4 +2,4 @@ include LICENSE
 include README.md
 include requirements.txt
 include .gitignore
-recursive-include docs
+recursive-include docs *
