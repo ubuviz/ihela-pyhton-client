@@ -10,8 +10,6 @@ Python client for integration
 import logging, json, string
 import urllib.parse
 
-__version__ = "0.0.3"
-
 try:
     import secrets
 except ImportError:  # Python < 3.6
@@ -30,12 +28,12 @@ iHela_AUTH_URL = "oAuth2/authorize/"
 
 iHela_ENDPOINTS = {
     "USER_INFO": "api/v1/connected-user/",
-    "BILL_INIT": "api/v1/payments/bill/init/",
-    "BILL_VERIFY": "api/v1/payments/bill/verify/",
+    # "BILL_INIT": "api/v1/payments/bill/init/",
+    # "BILL_VERIFY": "api/v1/payments/bill/verify/",
 }
 
 
-class Client(object):
+class MerchantAuthorizationClient(object):
     provider_name = "iHelá"
 
     def __init__(self, client_id, client_secret, state=None, test=False, ihela_url=None):
@@ -163,8 +161,8 @@ class Client(object):
         else:
             return {"errors": {"authentication": "The client is not authenticated"}}
 
-    def bill_verify(self, code, reference, intern_reference):
-        bill_data = {"code": code, "reference": reference, "intern_reference": intern_reference}
+    def bill_verify(self, code, reference, intern_reference=None):
+        bill_data = {"code": code, "reference": reference}
         url = iHela_ENDPOINTS["BILL_VERIFY"]
         bill_ = requests.post(self.get_url(url), data=bill_data)
         bill_verified = self.get_response(bill_)
@@ -176,7 +174,7 @@ if __name__ == "__main__":
     client_id = "5Q3Ew1mQiZBd4UmI3W7LrfkJlLxA4T4lPIX3lnxx"
     client_secret = "9btvRN7VUsZMyCNddn1Zx1rIEUnX7ITsCH3YqgWRxfA0Za7aVHA2mlKnEU9m5Y7en3wQoAMDWBOqJ8QYVfFYnJmM8BYCB5tO9NIrkUOtDmvB3rYD0QyEWEFIsafqfx2J"
 
-    cl = Client(client_id, client_secret, ihela_url="http://127.0.0.1:8080/")
+    cl = MerchantAuthorizationClient(client_id, client_secret, ihela_url="http://127.0.0.1:8080/")
     url = cl.get_authorization_url("http://127.0.0.1:4040/")
 
     print(url)
