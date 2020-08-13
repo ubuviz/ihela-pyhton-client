@@ -166,3 +166,17 @@ Having the bank will help getting the slug for cashin.
 cashin = cl.cashin_client("MF1-0001", "000016-01", 20000, "REF3223", "Cashin description")
 ```
 Here is an sample example
+
+```json
+{
+    "bank_slug": "MF1-0001",
+    "account": "000016-01",
+    "amount": "20000.00",
+    "description": "Cashin description",
+    "merchant_reference": "REF3223",
+    "error": false,
+    "error_message": "Success",
+    "reference": "CPT-5/01-199",
+    "response_status": 200,
+}
+```
