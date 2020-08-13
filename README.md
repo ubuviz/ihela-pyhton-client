@@ -16,9 +16,9 @@ from ihela_client import MerchantClient
 
 CLIENT_ID = "<Your Client ID>"
 CLIENT_SECRET = "<Your Client Secret>"
-TEST_ENV = True
+PROD_ENV = False
 
-cl = MerchantClient(CLIENT_ID, CLIENT_SECRET, test=TEST_ENV)
+cl = MerchantClient(CLIENT_ID, CLIENT_SECRET, prod=PROD_ENV)
 redirect_uri = "https://yourapp.com/uri/to/redirect/to/"
 
 ```

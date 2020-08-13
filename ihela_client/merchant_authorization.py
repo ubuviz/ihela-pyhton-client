@@ -10,8 +10,6 @@ Python client for integration
 import logging, json, string
 import urllib.parse
 
-__version__ = "0.0.3"
-
 try:
     import secrets
 except ImportError:  # Python < 3.6
