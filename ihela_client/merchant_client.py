@@ -52,7 +52,7 @@ class MerchantClient(object):
         #     self.ihela_base_url = ihela_url
         # if ihela_url:
         #     self.ihela_base_url = iHela_BASE_TEST_URL
-        if self.ihela_url:
+        if ihela_url:
             self.ihela_base_url = self.ihela_url
 
         elif self.prod_env:
