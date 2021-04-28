@@ -1,6 +1,6 @@
 # iHela Client
 
-This repository provides a Python client for iHela platform.
+This is the repository for a Python client for consuming the iHela Crédit Union API for financial services in Burundi. The API gateway can be found on https://testgate.ihela.online/
 
 ## Get started
 
