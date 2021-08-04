@@ -48,11 +48,16 @@ class MerchantClient(object):
         self.prod_env = prod
 
         self.ihela_base_url = iHela_BASE_URL
-        if self.prod_env == False:
-            self.ihela_base_url = iHela_BASE_TEST_URL
-        if self.prod_env == True:
-            self.ihela_base_url = iHela_BASE_URL
         if ihela_url:
+            self.ihela_base_url = self.ihela_url
+
+        elif self.prod_env == True:
+            self.ihela_base_url = iHela_BASE_URL
+
+        elif self.prod_env == False:
+            self.ihela_base_url = iHela_BASE_TEST_URL
+
+        else:
             self.ihela_base_url = iHela_BASE_TEST_URL
 
         self.authenticate()
