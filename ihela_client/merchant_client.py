@@ -122,8 +122,8 @@ class MerchantClient(object):
         user,
         description,
         reference,
-        bank,
-        bank_client_id,
+        bank=None,
+        bank_client_id=None,
         redirect_uri=None,
     ):
         if self.is_authenticated():
