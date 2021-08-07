@@ -48,15 +48,14 @@ class MerchantClient(object):
         self.prod_env = prod
 
         self.ihela_base_url = iHela_BASE_URL
-        # if self.prod_env:
-        #     self.ihela_base_url = ihela_url
-        # if ihela_url:
-        #     self.ihela_base_url = iHela_BASE_TEST_URL
         if ihela_url:
             self.ihela_base_url = self.ihela_url
 
-        elif self.prod_env:
+        elif self.prod_env == True:
             self.ihela_base_url = iHela_BASE_URL
+
+        elif self.prod_env == False:
+            self.ihela_base_url = iHela_BASE_TEST_URL
 
         else:
             self.ihela_base_url = iHela_BASE_TEST_URL
@@ -117,13 +116,24 @@ class MerchantClient(object):
         if self.is_authenticated():
             return self.auth_token_object["token_type"]
 
-    def init_bill(self, amount, user, description, reference, redirect_uri=None):
+    def init_bill(
+        self,
+        amount,
+        user,
+        description,
+        reference,
+        bank=None,
+        bank_client_id=None,
+        redirect_uri=None,
+    ):
         if self.is_authenticated():
             bill_data = {
                 "amount": amount,
                 "description": description,
                 "merchant_reference": reference,
                 "user": user,
+                "bank": bank,
+                "bank_client_id": bank_client_id,
                 "redirect_uri": redirect_uri,
             }
             url = iHela_ENDPOINTS["BILL_INIT"]

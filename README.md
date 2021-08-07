@@ -22,15 +22,18 @@ cl = MerchantClient(CLIENT_ID, CLIENT_SECRET, prod=PROD_ENV)
 redirect_uri = "https://yourapp.com/uri/to/redirect/to/"
 
 ```
+Set `PROD_ENV = True` for production, otherwise set it to `PROD_ENV = False`
 The `redirect_uri` must be registered with the client created by iHela both for test and production. This is not mandatory.
 
 ### Initialize Bill
 
 Call bills functions as shown below
 ```python
-# cl.init_bill(AMOUNT, USER_EMAIL, TRANSACTION_DESCRIPTION, MERCHANT_REFERENCE, redirect_uri=URL)
-bill = cl.init_bill(2000, "clientmail@gmail.com", "My description", "unique_reference", redirect_uri=redirect_uri)
+# cl.init_bill(AMOUNT, USER_EMAIL, TRANSACTION_DESCRIPTION, MERCHANT_REFERENCE, BANK, BANK_CLIENT_ID,redirect_uri=URL)
+bill = cl.init_bill(2000, "clientmail@gmail.com", "My description", "unique_reference",redirect_uri=redirect_uri)
 ```
+BANK and BANK_CLIENT_ID are optional, They are used when the transaction is made from a third party Bank or Institution.
+
 Here is a response sample. You must have a copy of the "code" and the "confirmation_uri" and other data you judge important. The confirmation_uri provides a direct url to the bill in iHela. You can directly redirect the user to.
 ```json
 {
