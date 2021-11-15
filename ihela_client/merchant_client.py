@@ -32,7 +32,8 @@ iHela_ENDPOINTS = {
     "BILL_INIT": "api/v1/payments/bill/init/",
     "BILL_VERIFY": "api/v1/payments/bill/verify/",
     "CASHIN": "api/v1/payments/cash-in/",
-    "BANKS_ALL": "api/v1/bank/all",
+    "BANKS_ALL": "api/v1/payments/bank",
+    "LOOKUP": "api/v1/bank/%s/account/lookup/",
 }
 
 
@@ -48,13 +49,14 @@ class MerchantClient(object):
         self.prod_env = prod
 
         self.ihela_base_url = iHela_BASE_URL
-        if ihela_url:
-            self.ihela_base_url = self.ihela_url
 
-        elif self.prod_env == True:
+        if ihela_url:
+            self.ihela_base_url = ihela_url
+
+        elif self.prod_env is True:
             self.ihela_base_url = iHela_BASE_URL
 
-        elif self.prod_env == False:
+        elif self.prod_env is False:
             self.ihela_base_url = iHela_BASE_TEST_URL
 
         else:
@@ -115,6 +117,17 @@ class MerchantClient(object):
     def get_token_type(self, code):
         if self.is_authenticated():
             return self.auth_token_object["token_type"]
+
+    def customer_lookup(self, bank_slug, customer_id):
+        url = iHela_ENDPOINTS["LOOKUP"] % bank_slug
+        customer_info_ = requests.get(
+            self.get_url(url),
+            params={"customer_id": customer_id},
+            headers=self.get_auth_headers(),
+        )
+        customer_info = self.get_response(customer_info_)
+
+        return customer_info
 
     def init_bill(
         self,
@@ -186,7 +199,9 @@ if __name__ == "__main__":
     client_id = "4sS7OWlf8pqm04j1ZDtvUrEVSZjlLwtfGUMs2XWZ"
     client_secret = "HN7osYwSJuEOO4MEth6iNlBS8oHm7LBhC8fejkZkqDJUrvVQodKtO55bMr845kmplSlfK3nxFcEk2ryiXzs1UW1YfVP5Ed6Yw0RR6QmnwsQ7iNJfzTgeehZ2XM9mmhC3"
 
-    cl = MerchantClient(client_id, client_secret, ihela_url="http://127.0.0.1:8080/")
+    cl = MerchantClient(
+        client_id, client_secret
+    )  # , ihela_url="http://127.0.0.1:8080/")
     print("\nBILL INIT : ", cl.ihela_base_url)
 
     bill = cl.init_bill(
@@ -204,6 +219,10 @@ if __name__ == "__main__":
     banks = cl.get_bank_list()
 
     print("\nBANKS : ", banks)
+
+    client = cl.customer_lookup("MF1-0001", "000016-01")
+
+    print("\nCLIENT : ", client)
 
     cashin = cl.cashin_client(
         "MF1-0001", "000016-01", 20000, secrets.token_hex(10), "Cashin description"
