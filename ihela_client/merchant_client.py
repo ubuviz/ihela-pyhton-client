@@ -172,27 +172,33 @@ class MerchantClient(object):
     def cashin_client(
         self, bank_slug, account, amount, merchant_reference, description
     ):
-        cashin_data = {
-            "bank_slug": bank_slug,
-            "account": account,
-            "amount": amount,
-            "merchant_reference": merchant_reference,
-            "description": description,
-        }
-        url = iHela_ENDPOINTS["CASHIN"]
-        cashin_ = requests.post(
-            self.get_url(url), data=cashin_data, headers=self.get_auth_headers()
-        )
-        cashin = self.get_response(cashin_)
+        if self.is_authenticated():
+            cashin_data = {
+                "bank_slug": bank_slug,
+                "account": account,
+                "amount": amount,
+                "merchant_reference": merchant_reference,
+                "description": description,
+            }
+            url = iHela_ENDPOINTS["CASHIN"]
+            cashin_ = requests.post(
+                self.get_url(url), data=cashin_data, headers=self.get_auth_headers()
+            )
+            cashin = self.get_response(cashin_)
 
-        return cashin
+            return cashin
+        else:
+            return {"errors": {"authentication": "The client is not authenticated"}}
 
     def get_bank_list(self):
-        url = iHela_ENDPOINTS["BANKS_ALL"]
-        banks_ = requests.get(self.get_url(url), headers=self.get_auth_headers())
-        banks = self.get_response(banks_)
+        if self.is_authenticated():
+            url = iHela_ENDPOINTS["BANKS_ALL"]
+            banks_ = requests.get(self.get_url(url), headers=self.get_auth_headers())
+            banks = self.get_response(banks_)
 
-        return banks
+            return banks
+        else:
+            return {"errors": {"authentication": "The client is not authenticated"}}
 
 
 if __name__ == "__main__":
