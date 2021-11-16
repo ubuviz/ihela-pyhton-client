@@ -32,7 +32,7 @@ iHela_ENDPOINTS = {
     "BILL_INIT": "api/v1/payments/bill/init/",
     "BILL_VERIFY": "api/v1/payments/bill/verify/",
     "CASHIN": "api/v1/payments/cash-in/",
-    "BANKS_ALL": "api/v1/payments/bank",
+    "BANKS_ALL": "api/v1/payments/bank/",
     "LOOKUP": "api/v1/bank/%s/account/lookup/",
 }
 
@@ -140,6 +140,8 @@ class MerchantClient(object):
         redirect_uri=None,
     ):
         if self.is_authenticated():
+            if bank and not bank_client_id:
+                bank_client_id = user
             bill_data = {
                 "amount": amount,
                 "description": description,
@@ -211,11 +213,16 @@ if __name__ == "__main__":
     print("\nBILL INIT : ", cl.ihela_base_url)
 
     bill = cl.init_bill(
-        2000, "pierreclaverkoko@gmail.com", "My description", secrets.token_hex(10)
+        2000,
+        # "76077736",
+        "pierreclaverkoko@gmail.com",
+        "My description",
+        str(secrets.token_hex(10)),
+        # bank="MOB-0003"
     )
+    print(bill)
 
     if bill["bill"].get("merchant_reference"):
-        print(bill)
         bill_verif = cl.verify_bill(
             bill["bill"]["merchant_reference"], bill["bill"]["code"]
         )
@@ -231,7 +238,7 @@ if __name__ == "__main__":
     print("\nCLIENT : ", client)
 
     cashin = cl.cashin_client(
-        "MF1-0001", "000016-01", 20000, secrets.token_hex(10), "Cashin description"
+        "MF1-0001", "000016-01", 20000, str(secrets.token_hex(10)), "Cashin description"
     )
 
     print("\nCASHIN : ", cashin)
