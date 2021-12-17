@@ -8,6 +8,7 @@ Python client for integration
 """
 
 import logging, json, string
+import simplejson
 import urllib.parse
 
 
@@ -70,9 +71,12 @@ class MerchantClient(object):
             resp_json["response_status"] = resp.status_code
             logger.debug(resp_json)
             return resp_json
-        except json.decoder.JSONDecodeError:
+        except (json.decoder.JSONDecodeError, simplejson.errors.JSONDecodeError):
             logger.error("IHELA_CLIENT_ERROR : %s" % resp.text)
-            return {"errors": {"request": "An error occured during request"}}
+            return {
+                "errors": {"request": "An error occured during request"},
+                "bill": {},
+            }
 
     def get_url(self, url):
         return self.ihela_base_url + str(url)
@@ -205,8 +209,9 @@ class MerchantClient(object):
 
 if __name__ == "__main__":
     client_id = "4sS7OWlf8pqm04j1ZDtvUrEVSZjlLwtfGUMs2XWZ"
+    client_id = "KziHxNoydAhWV2uVSfimZf7ApMY1tdjW9vYXfGwk"
     client_secret = "HN7osYwSJuEOO4MEth6iNlBS8oHm7LBhC8fejkZkqDJUrvVQodKtO55bMr845kmplSlfK3nxFcEk2ryiXzs1UW1YfVP5Ed6Yw0RR6QmnwsQ7iNJfzTgeehZ2XM9mmhC3"
-
+    client_secret = "LjATwjOk70mGVdkyGZNxRih0FLe4lfF2UEgHAGAF7ovK38jQQ9dBdd1SSmWoXZl44wee0bFamQQclq1sQFUBL6XBsGqjRV8DR8isa2GEVNNMroLWiB1K5ZZf3H9UoCyt"
     cl = MerchantClient(
         client_id, client_secret
     )  # , ihela_url="http://127.0.0.1:8080/")
