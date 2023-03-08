@@ -12,7 +12,7 @@ Install the package with `pip install ihela-python-client`
 
 import the package for using the provided functions to communicate with the iHela API
 ```python
-from ihela_client import MerchantClient 
+from ihela_client import MerchantClient
 
 CLIENT_ID = "<Your Client ID>"
 CLIENT_SECRET = "<Your Client Secret>"

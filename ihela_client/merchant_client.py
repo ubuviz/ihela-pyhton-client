@@ -7,9 +7,13 @@ info@ubuviz.com
 Python client for integration
 """
 
-import logging, json, string
+import json
+import logging
+
+# import string
 import simplejson
-import urllib.parse
+
+# import urllib.parse
 
 
 try:
@@ -41,7 +45,7 @@ iHela_ENDPOINTS = {
 }
 
 
-class MerchantClient(object):
+class MerchantClient:
     no_auth_response = {
         "success": False,
         "response_code": "401",
@@ -244,9 +248,9 @@ if __name__ == "__main__":
     client_id = "4sS7OWlf8pqm04j1ZDtvUrEVSZjlLwtfGUMs2XWZ"
     client_id = "12CMmsS2e3aqONxYHCSpHaG3p7VWls9vtczbNk1b"
     # client_id = "KziHxNoydAhWV2uVSfimZf7ApMY1tdjW9vYXfGwk"
-    client_secret = "HN7osYwSJuEOO4MEth6iNlBS8oHm7LBhC8fejkZkqDJUrvVQodKtO55bMr845kmplSlfK3nxFcEk2ryiXzs1UW1YfVP5Ed6Yw0RR6QmnwsQ7iNJfzTgeehZ2XM9mmhC3"
-    client_secret = "duwbLBiKPoJTytFnMcAbP8QxmaAJPboNQHslRpqgCsSplNo5Es4tBFDJl2Iae0WAErpP4QcQ0iUGpxkoFdFXnOeGDMvtX5JLVyrlvRE6DfScBagKExHdmugWwDstFHgP"
-    # client_secret = "LjATwjOk70mGVdkyGZNxRih0FLe4lfF2UEgHAGAF7ovK38jQQ9dBdd1SSmWoXZl44wee0bFamQQclq1sQFUBL6XBsGqjRV8DR8isa2GEVNNMroLWiB1K5ZZf3H9UoCyt"
+    client_secret = "HN7osYwSJuEOO4MEth6iNlBS8oHm7LBhC8fejkZkqDJUrvVQodKtO55bMr845kmplSlfK3nxFcEk2ryiXzs1UW1YfVP5Ed6Yw0RR6QmnwsQ7iNJfzTgeehZ2XM9mmhC3"  # noqa
+    client_secret = "duwbLBiKPoJTytFnMcAbP8QxmaAJPboNQHslRpqgCsSplNo5Es4tBFDJl2Iae0WAErpP4QcQ0iUGpxkoFdFXnOeGDMvtX5JLVyrlvRE6DfScBagKExHdmugWwDstFHgP"  # noqa
+    # client_secret = "LjATwjOk70mGVdkyGZNxRih0FLe4lfF2UEgHAGAF7ovK38jQQ9dBdd1SSmWoXZl44wee0bFamQQclq1sQFUBL6XBsGqjRV8DR8isa2GEVNNMroLWiB1K5ZZf3H9UoCyt" # noqa
     cl = MerchantClient(
         client_id,
         client_secret,
