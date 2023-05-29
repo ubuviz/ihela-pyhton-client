@@ -59,7 +59,7 @@ print("\nCASHIN TO CLIENT : ", cashin_reference, " ::: ", cashin)
 cashin_resp_data = cashin.get("response_data", {})
 ihela_reference = cashin_resp_data.get("reference") if cashin_resp_data else None
 operations_status = cl.operations_status(
-    external_reference="cashin_reference",
+    external_reference=cashin_reference,
     ihela_reference=ihela_reference,
 )
 print(
