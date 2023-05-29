@@ -2,3 +2,4 @@ pip-tools
 requests
 simplejson
 pre-commit
+gunicorn
