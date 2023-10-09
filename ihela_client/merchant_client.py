@@ -25,7 +25,7 @@ iHela_AUTH_URL = "oAuth2/authorize/"
 iHela_ENDPOINTS = {
     "PING": "api/v2/ping/",
     "USER_INFO": "api/v2/connected-user/",
-    "BILL_INIT": "api/v2/payments/bill/init/",
+    "BILL_INIT": "api/v2/payments/bill-init/",
     "OPERATION_STATUS": "api/v2/operations/status/",
     "CASHIN": "api/v2/payments/cash-in/",
     # "BANKS": "api/v2/bank/all",

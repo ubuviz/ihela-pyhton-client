@@ -14,59 +14,64 @@ client_secret = "duwbLBiKPoJTytFnMcAbP8QxmaAJPboNQHslRpqgCsSplNo5Es4tBFDJl2Iae0W
 cl = MerchantClient(
     client_id,
     client_secret,
-    pin_code="1234",
+    pin_code="4321",
     ihela_url="http://10.30.0.7/",
 )
-# )  # , ihela_url="http://127.0.0.1:8080/")
+# cl = MerchantClient(
+#     client_id,
+#     client_secret,
+#     pin_code="4321",
+#     ihela_url="http://127.0.0.1:8080/",
+# )
 print("\nPING IHELA : ", cl.ihela_base_url)
 ping = cl.ping()
 print("PING DATA : ", ping)
 
-# bill = cl.init_bill(
-#     2000,
-#     # "76077736",
-#     "pierreclaverkoko@gmail.com",
-#     "My description",
-#     str(secrets.token_hex(10)),
-#     # bank="MOB-0003"
+bill = cl.init_bill(
+    2000,
+    # "76077736",
+    "pierreclaverkoko@gmail.com",
+    "My description",
+    str(secrets.token_hex(10)),
+    # bank="MOB-0003"
+)
+print(bill)
+
+if bill["bill"].get("merchant_reference"):
+    bill_verif = cl.verify_bill(
+        bill["bill"]["merchant_reference"], bill["bill"]["code"]
+    )
+
+    print("\nBILL VERIFY : ", bill_verif)
+
+# banks = cl.get_bank_list()
+# print("\nBANKS LIST : ", banks)
+
+# client = cl.customer_lookup("MF1-0001", "000016-01")
+# print("\nCUSTOMER LOOKUP : ", client)
+
+# cashin_reference = str(secrets.token_hex(10))
+# cashin = cl.cashin_client(
+#     "MF1-0001",
+#     "000016-01",
+#     "Pierre Claver Koko",
+#     20000,
+#     cashin_reference,
+#     "Cashin description",
 # )
-# print(bill)
+# print("\nCASHIN TO CLIENT : ", cashin_reference, " ::: ", cashin)
 
-# if bill["bill"].get("merchant_reference"):
-#     bill_verif = cl.verify_bill(
-#         bill["bill"]["merchant_reference"], bill["bill"]["code"]
-#     )
-
-#     print("\nBILL VERIFY : ", bill_verif)
-
-banks = cl.get_bank_list()
-print("\nBANKS LIST : ", banks)
-
-client = cl.customer_lookup("MF1-0001", "000016-01")
-print("\nCUSTOMER LOOKUP : ", client)
-
-cashin_reference = str(secrets.token_hex(10))
-cashin = cl.cashin_client(
-    "MF1-0001",
-    "000016-01",
-    "Pierre Claver Koko",
-    20000,
-    cashin_reference,
-    "Cashin description",
-)
-print("\nCASHIN TO CLIENT : ", cashin_reference, " ::: ", cashin)
-
-cashin_resp_data = cashin.get("response_data", {})
-ihela_reference = cashin_resp_data.get("reference") if cashin_resp_data else None
-operations_status = cl.operations_status(
-    external_reference=cashin_reference,
-    ihela_reference=ihela_reference,
-)
-print(
-    "\nOPERATION STATUS : ",
-    cashin_reference,
-    " >< ",
-    ihela_reference,
-    " ::: ",
-    operations_status,
-)
+# cashin_resp_data = cashin.get("response_data", {})
+# ihela_reference = cashin_resp_data.get("reference") if cashin_resp_data else None
+# operations_status = cl.operations_status(
+#     external_reference=cashin_reference,
+#     ihela_reference=ihela_reference,
+# )
+# print(
+#     "\nOPERATION STATUS : ",
+#     cashin_reference,
+#     " >< ",
+#     ihela_reference,
+#     " ::: ",
+#     operations_status,
+# )
