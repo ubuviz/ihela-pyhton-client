@@ -27,22 +27,24 @@ print("\nPING IHELA : ", cl.ihela_base_url)
 ping = cl.ping()
 print("PING DATA : ", ping)
 
+merchant_reference = str(secrets.token_hex(10))
 bill = cl.init_bill(
-    2000,
+    amount=2000,
     # "76077736",
-    "pierreclaverkoko@gmail.com",
-    "My description",
-    str(secrets.token_hex(10)),
+    description="My description",
+    reference=merchant_reference,
     # bank="MOB-0003"
+    bank="MF1-0001",
+    bank_account="16-01",
 )
-print(bill)
+print("BILL INIT DATA : ", bill)
 
-if bill["bill"].get("merchant_reference"):
+if bill.get("response_data", {}).get("bill", {}):
     bill_verif = cl.verify_bill(
-        bill["bill"]["merchant_reference"], bill["bill"]["code"]
+        bill_code=bill["response_data"]["bill"], merchant_reference=merchant_reference
     )
 
-    print("\nBILL VERIFY : ", bill_verif)
+    print("BILL VERIFY DATA : ", bill_verif)
 
 # banks = cl.get_bank_list()
 # print("\nBANKS LIST : ", banks)

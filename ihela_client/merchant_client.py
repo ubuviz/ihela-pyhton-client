@@ -26,6 +26,7 @@ iHela_ENDPOINTS = {
     "PING": "api/v2/ping/",
     "USER_INFO": "api/v2/connected-user/",
     "BILL_INIT": "api/v2/payments/bill-init/",
+    "BILL_VERIFY": "api/v2/payments/bill-check/",
     "OPERATION_STATUS": "api/v2/operations/status/",
     "CASHIN": "api/v2/payments/cash-in/",
     # "BANKS": "api/v2/bank/all",
@@ -160,26 +161,40 @@ class MerchantClient:
     def init_bill(
         self,
         amount,
-        user,
         description,
         reference,
         bank=None,
-        bank_client_id=None,
+        bank_account=None,
         redirect_uri=None,
     ):
         if self.is_authenticated():
-            if bank and not bank_client_id:
-                bank_client_id = user
             bill_data = {
                 "amount": amount,
                 "description": description,
                 "merchant_reference": reference,
-                "user": user,
-                "bank": bank,
-                "bank_client_id": bank_client_id,
+                "debit_bank": bank,
+                "debit_account": bank_account,
                 "redirect_uri": redirect_uri,
+                "pin_code": self.pin_code,
             }
             url = iHela_ENDPOINTS["BILL_INIT"]
+            bill_ = requests.post(
+                self.get_url(url), data=bill_data, headers=self.get_auth_headers()
+            )
+            bill_initiated = self.get_response(bill_)
+
+            return bill_initiated
+        else:
+            return self.no_auth_response
+
+    def verify_bill(self, bill_code, merchant_reference):
+        if self.is_authenticated():
+            bill_data = {
+                "bill_code": bill_code,
+                "merchant_reference": merchant_reference,
+                "pin_code": self.pin_code,
+            }
+            url = iHela_ENDPOINTS["BILL_VERIFY"]
             bill_ = requests.post(
                 self.get_url(url), data=bill_data, headers=self.get_auth_headers()
             )
