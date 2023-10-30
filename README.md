@@ -1,6 +1,6 @@
 # iHela Client
 
-This is the repository for a Python client for consuming the iHela Crédit Union API for financial services in Burundi. The API gateway can be found on https://testgate.ihela.online/
+This is the repository for a Python client for consuming the iHela Crédit Union API for financial services in Burundi. The API gateway can be found on https://api.ihela.bi/testenv/
 
 ## Get started
 
@@ -37,81 +37,48 @@ The bank list response gives the bank information that can help you provide a co
 
 ```python
 {
-    "banks": [
-        {
-            "slug": "MF1-0001",
-            "name": "iHela Credit Union",
-            "swift_code": None,
-            "bank_code": 1,
-            "bank_type": "MF1",
-            "can_create_account_online": True,
-            "is_active": True,
-            "company": {
-                "name": "Ihelá Credit Union",
-                "fullname": "Ihelá Credit Union",
-                "nickname": "ICU",
-                "slug": "ihela-credit-union",
-                "image": "https://testgate.ihela.online/vwmedia/addressbook/companies/ihelalogo_DCklq5H.jpg",
-                "about": "Ihelá Credit Union",
-                "logo": "https://testgate.ihela.online/vwmedia/addressbook/companies/ihelalogo_DCklq5H.jpg",
-                "logo_icon": "https://testgate.ihela.online/vwmedia/addressbook/companies/icon/ihelacreditunionfondblanc.png",
-            },
-            "limits_config": None,
-            "account_masked_text": "000000-00",
-            "ihela_account_inside": None,
-        },
-        {
-            "slug": "MOB-0003",
-            "name": "EcoCash",
-            "swift_code": None,
-            "bank_code": 3,
-            "bank_type": "MOB",
-            "can_create_account_online": False,
-            "is_active": True,
-            "company": {
-                "name": "EcoCash",
-                "fullname": "EcoCash",
-                "nickname": None,
-                "slug": "ecocash",
-                "image": "https://testgate.ihela.online/vwmedia/addressbook/companies/logoEcoCash.gif",
-                "about": "",
-                "logo": "https://testgate.ihela.online/vwmedia/addressbook/companies/logoEcoCash.gif",
-                "logo_icon": "https://testgate.ihela.online/vwmedia/addressbook/companies/icon/logoEcoCash_LfUl0cA.gif",
-            },
-            "limits_config": None,
-            "account_masked_text": "00000000",
-            "ihela_account_inside": None,
-        },
-        {
-            "slug": "MOB-0006",
-            "name": "PesaFlash",
-            "swift_code": None,
-            "bank_code": 6,
-            "bank_type": "MOB",
-            "can_create_account_online": False,
-            "is_active": True,
-            "company": {
-                "name": "Pesaflashjklfs",
-                "fullname": "Pesaflashjklfs",
-                "nickname": "-",
-                "slug": "pesaflashjklfs",
-                "image": "https://testgate.ihela.online/vwmedia/addressbook/companies/FINBANK_LANDSCAPE_MxkUXas.png",
-                "about": "Pesaflash",
-                "logo": "https://testgate.ihela.online/vwmedia/addressbook/companies/FINBANK_LANDSCAPE_MxkUXas.png",
-                "logo_icon": "https://testgate.ihela.online/vwmedia/addressbook/companies/icon/FINBANK_LANDSCAPE_A0DFqu8.png",
-            },
-            "limits_config": {
-                "in_minimum": "10000.00",
-                "in_maximum": "50000000.00",
-                "out_minimum": "10000.00",
-                "out_maximum": "50000000.00",
-            },
-            "account_masked_text": None,
-            "ihela_account_inside": None,
-        },
-    ],
-    "count": 3,
-    "response_status": 200,
+    "response_code": "00",
+    "response_data": {
+        "objects": [
+            {
+                "id": 1,
+                "slug": "MF1-0001",
+                "name": "IHELÁ CREDIT UNION",
+                "swift_code": null,
+                "bank_code": 1,
+                "bank_type": "MF1",
+                "can_create_account_online": true,
+                "is_active": true,
+                "company": {
+                    "name": "IHELÁ CREDIT UNION",
+                    "fullname": "IHELÁ CREDIT UNION",
+                    "nickname": "ICU",
+                    "slug": "0000000002",
+                    "image": "https://testcbsdbs.ihela.bi/media/clients/corporate/2_ihela.png",
+                    "about": "IHELÁ CREDIT UNION",
+                    "logo": "https://testcbsdbs.ihela.bi/media/clients/corporate/2_ihela.png",
+                    "logo_icon": "https://testcbsdbs.ihela.bi/media/clients/corporate/2_ihela_logo_red.png"
+                },
+                "limits_config": null,
+                "account_masked_text": null,
+                "is_default": true,
+                "api_values": {
+                    "has_lookup": true,
+                    "has_cashin": true,
+                    "has_cashout": true,
+                    "has_integrated_too": false,
+                    "additional_api_list": [
+                        "agent_agent_transfer",
+                        "agent_lookup"
+                    ]
+                }
+            }
+        ],
+        "count": 7
+    },
+    "response_message": "Done",
+    "success": true,
+    "response_status": 200
 }
 ```
 
@@ -127,7 +94,15 @@ customer_lookup = cl.customer_lookup(bank_slug=selected_bank["slug"], customer_i
 And you get the acccount_number :
 
 ```python
-{'account_number': '000001-01', 'name': 'Bigirimana Fabrice', 'response_status': 200}
+{
+    "response_code": "00",
+    "response_data": {
+        "account_number": "30001-01-00-0000000001-01-95",
+        "name": "Bizimana Jean Claude"
+    },
+    "response_message": "Success",
+    "success": true
+}
 ```
 The name can be prompted so that the user can confirm there is no error.
 
@@ -152,30 +127,13 @@ Here is a response sample. You must have a copy of the "code" and the "confirmat
 
 ```python
 {
-	"bill": {
-	    "merchant": {
-	        "title": "Global Test Merchant",
-	    },
-	    "amount": "2000.00",
-	    "currency": 108,
-	    "currency_info": {
-	        "iso_code": 108,
-	        "iso_alpha_code": "BIF",
-	        "title": "BURUNDIAN FRANC",
-	        "abbreviation": "BIF",
-	        "operation_min_amount": "1.00"
-	    },
-	    "description": "Global Test Merchant (1) My description 58646cc904c471d6413e",
-	    "merchant_reference": "58646cc904c471d6413e",
-	    "status": {"label": "Initiated", "value": "I", "css": "tag is-info"},
-	    "expired": False,
-	    "code": "BILL-20200813-B8GUIUDIN0",
-	    "redirect_uri": None,
-	    "confirmation_uri": "https://mytest.ihela.online/u/operations/bill/confirm/BILL-20200813-B8GUIUDIN0",
-	    "payment_reference": None,
-	    "created_at": "2020-08-13T10:24:58.014322Z"
-	},
-	"response_status": 200
+    "response_code": "00",
+    "response_data": {
+        "code": "CODE-20230321-9E29QH1",
+        "reference": null
+    },
+    "response_message": "Payment bill successfully created. The client has to validate it to complete the payment. Code : CODE-20230321-9E29QH1",
+    "success": true
 }
 ```
 
@@ -188,13 +146,15 @@ cl.verify_bill(bill["bill"]["merchant_reference"], bill["bill"]["code"])
 Here is a response sample. Bill can be **Pending**, **Paid** or **Expired**. If bill is paid, "bank_reference" will return the transaction reference in the bank.
 ```python
 {
-    "bill": {
-        "bank_reference": None,
-        "reference": "BILL-20200813-B8GUIUDIN0",
-        "code": "58646cc904c471d6413e",
-        "status": "Pending"
-    },
-    "response_status": 200
+  "response_code": "00",
+  "response_data": {
+    "bill_code": "CODE-20230321-JQ4H26F",
+    "merchant_reference": "752000",
+    "payment_reference": null,
+    "status": "Initial"
+  },
+  "response_message": "Done",
+  "success": true
 }
 ```
 
@@ -210,15 +170,17 @@ cashin = cl.cashin_client("MF1-0001", customer_lookup["account_number"], 20000, 
 Here is a response sample
 
 ```json
+
 {
-    "bank_slug": "MF1-0001",
-    "account": "000001-01",
-    "amount": "20000.00",
-    "description": "Cashin description",
-    "merchant_reference": "REF3223",
-    "error": false,
-    "error_message": "Success",
-    "reference": "CPT-5/01-199",
-    "response_status": 200,
+    "response_code": "00",
+    "response_data": {
+        "reference": "29032360510975",
+        "bank_reference": "123456",
+        "pending_id": 975,
+        "date": "2023-03-29T09:16:24.396951Z",
+        "is_partial": false
+    },
+    "response_message": "Transaction successfully done. Reference: 29032360510975 >> mTSF.3000100-756.3000101-2108",
+    "success": true
 }
 ```
