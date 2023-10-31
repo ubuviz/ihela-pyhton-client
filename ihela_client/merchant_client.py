@@ -7,39 +7,45 @@ info@ubuviz.com
 Python client for integration
 """
 
-import logging, json, string
-import urllib.parse
-
-
-try:
-    import secrets
-except ImportError:  # Python < 3.6
-    import random as secrets
+import json
+import logging
 
 import requests
+import simplejson
 
 logger = logging.getLogger(__name__)
 
 
-iHela_BASE_URL = "http://192.168.4.1/"
-iHela_BASE_TEST_URL = "https://testgate.ihela.online/"
+iHela_BASE_URL = "https://api.ihela.bi/"
+iHela_BASE_TEST_URL = "https://testapi.ihela.bi/"
 iHela_TOKEN_URL = "oAuth2/token/"
 iHela_AUTH_URL = "oAuth2/authorize/"
 
 
 iHela_ENDPOINTS = {
-    "USER_INFO": "api/v1/connected-user/",
-    "BILL_INIT": "api/v1/payments/bill/init/",
-    "BILL_VERIFY": "api/v1/payments/bill/verify/",
-    "CASHIN": "api/v1/payments/cash-in/",
-    "BANKS_ALL": "api/v1/payments/bank/",
-    "LOOKUP": "api/v1/bank/%s/account/lookup/",
+    "PING": "api/v2/ping/",
+    "USER_INFO": "api/v2/connected-user/",
+    "BILL_INIT": "api/v2/payments/bill-init/",
+    "BILL_VERIFY": "api/v2/payments/bill-check/",
+    "OPERATION_STATUS": "api/v2/operations/status/",
+    "CASHIN": "api/v2/payments/cash-in/",
+    # "BANKS": "api/v2/bank/all",
+    "BANKS": "api/v2/payments/bank/",
+    "BANKS_ALL": "api/v2/payments/bank/%s/",
+    "LOOKUP": "api/v2/bank/%s/account/lookup/",
 }
 
 
-class MerchantClient(object):
+class MerchantClient:
+    no_auth_response = {
+        "success": False,
+        "response_code": "401",
+        "response_message": "The client is not authenticated",
+        "response_data": {"authentication": "The client is not authenticated"},
+    }
+
     def __init__(
-        self, client_id, client_secret, state=None, prod=False, ihela_url=None
+        self, client_id, client_secret, pin_code, state=None, prod=False, ihela_url=None
     ):
         self.client_id = client_id
         self.client_secret = client_secret
@@ -47,6 +53,7 @@ class MerchantClient(object):
         self.redirect_uri = None
         self.state = state
         self.prod_env = prod
+        self.pin_code = pin_code
 
         self.ihela_base_url = iHela_BASE_URL
 
@@ -67,15 +74,25 @@ class MerchantClient(object):
     def get_response(self, resp):
         try:
             resp_json = dict(resp.json())
-            resp_json["response_status"] = resp.status_code
+            # resp_json["response_status"] = resp.status_code
             logger.debug(resp_json)
             return resp_json
-        except json.decoder.JSONDecodeError:
+        except (json.decoder.JSONDecodeError, simplejson.errors.JSONDecodeError):
             logger.error("IHELA_CLIENT_ERROR : %s" % resp.text)
-            return {"errors": {"request": "An error occured during request"}}
+            return {
+                "success": False,
+                "response_code": "01",
+                "response_data": {
+                    "errors": {
+                        "request": "An error occured during request",
+                        "status": resp.status_code,
+                    }
+                },
+                "response_message": "An error occured during request",
+            }
 
     def get_url(self, url):
-        return self.ihela_base_url + str(url)
+        return f"{self.ihela_base_url}{url}"
 
     def get_auth_headers(self):
         if self.is_authenticated():
@@ -93,7 +110,7 @@ class MerchantClient(object):
         auth_data = {"grant_type": "client_credentials"}
 
         if not self.prod_env:
-            # TODO : Delete this line for production
+            # Don't make auth_data logger on production
             logger.debug(auth_data)
 
         auth_ = requests.post(
@@ -118,11 +135,23 @@ class MerchantClient(object):
         if self.is_authenticated():
             return self.auth_token_object["token_type"]
 
+    def ping(self):
+        """
+        This returns the connection availability with iHela servers
+        """
+        ping_info_ = requests.get(self.get_url(iHela_ENDPOINTS["PING"]))
+        ping_info = self.get_response(ping_info_)
+
+        return ping_info
+
     def customer_lookup(self, bank_slug, customer_id):
+        """
+        This returns a customer info in the given bank
+        """
         url = iHela_ENDPOINTS["LOOKUP"] % bank_slug
         customer_info_ = requests.get(
             self.get_url(url),
-            params={"customer_id": customer_id},
+            params={"account_number": customer_id},
             headers=self.get_auth_headers(),
         )
         customer_info = self.get_response(customer_info_)
@@ -132,24 +161,21 @@ class MerchantClient(object):
     def init_bill(
         self,
         amount,
-        user,
         description,
         reference,
         bank=None,
-        bank_client_id=None,
+        bank_account=None,
         redirect_uri=None,
     ):
         if self.is_authenticated():
-            if bank and not bank_client_id:
-                bank_client_id = user
             bill_data = {
                 "amount": amount,
                 "description": description,
                 "merchant_reference": reference,
-                "user": user,
-                "bank": bank,
-                "bank_client_id": bank_client_id,
+                "debit_bank": bank,
+                "debit_account": bank_account,
                 "redirect_uri": redirect_uri,
+                "pin_code": self.pin_code,
             }
             url = iHela_ENDPOINTS["BILL_INIT"]
             bill_ = requests.post(
@@ -159,28 +185,43 @@ class MerchantClient(object):
 
             return bill_initiated
         else:
-            return {"errors": {"authentication": "The client is not authenticated"}}
+            return self.no_auth_response
 
-    def verify_bill(self, code, reference):
-        bill_data = {"code": code, "reference": reference}
-        url = iHela_ENDPOINTS["BILL_VERIFY"]
-        bill_ = requests.post(
-            self.get_url(url), data=bill_data, headers=self.get_auth_headers()
-        )
-        bill_verified = self.get_response(bill_)
+    def verify_bill(self, bill_code, merchant_reference):
+        if self.is_authenticated():
+            bill_data = {
+                "bill_code": bill_code,
+                "merchant_reference": merchant_reference,
+                "pin_code": self.pin_code,
+            }
+            url = iHela_ENDPOINTS["BILL_VERIFY"]
+            bill_ = requests.post(
+                self.get_url(url), data=bill_data, headers=self.get_auth_headers()
+            )
+            bill_initiated = self.get_response(bill_)
 
-        return bill_verified
+            return bill_initiated
+        else:
+            return self.no_auth_response
 
     def cashin_client(
-        self, bank_slug, account, amount, merchant_reference, description
+        self,
+        bank_slug,
+        account,
+        account_holder,
+        amount,
+        merchant_reference,
+        description,
     ):
         if self.is_authenticated():
             cashin_data = {
-                "bank_slug": bank_slug,
-                "account": account,
+                "credit_bank": bank_slug,
+                "credit_account": account,
+                "credit_account_holder": account_holder,
                 "amount": amount,
                 "merchant_reference": merchant_reference,
                 "description": description,
+                "pin_code": self.pin_code,
             }
             url = iHela_ENDPOINTS["CASHIN"]
             cashin_ = requests.post(
@@ -190,55 +231,29 @@ class MerchantClient(object):
 
             return cashin
         else:
-            return {"errors": {"authentication": "The client is not authenticated"}}
+            return self.no_auth_response
 
-    def get_bank_list(self):
+    def operations_status(self, external_reference, ihela_reference):
+        status_data = {
+            "external_reference": external_reference,
+            "reference": ihela_reference,
+        }
+        url = iHela_ENDPOINTS["OPERATION_STATUS"]
+        status_ = requests.post(
+            self.get_url(url), data=status_data, headers=self.get_auth_headers()
+        )
+        ope_status = self.get_response(status_)
+
+        return ope_status
+
+    def get_bank_list(self, list_type=None):
+        if not list_type:
+            list_type = "cashin"
         if self.is_authenticated():
-            url = iHela_ENDPOINTS["BANKS_ALL"]
+            url = iHela_ENDPOINTS["BANKS_ALL"] % list_type
             banks_ = requests.get(self.get_url(url), headers=self.get_auth_headers())
             banks = self.get_response(banks_)
 
             return banks
         else:
-            return {"errors": {"authentication": "The client is not authenticated"}}
-
-
-if __name__ == "__main__":
-    client_id = "4sS7OWlf8pqm04j1ZDtvUrEVSZjlLwtfGUMs2XWZ"
-    client_secret = "HN7osYwSJuEOO4MEth6iNlBS8oHm7LBhC8fejkZkqDJUrvVQodKtO55bMr845kmplSlfK3nxFcEk2ryiXzs1UW1YfVP5Ed6Yw0RR6QmnwsQ7iNJfzTgeehZ2XM9mmhC3"
-
-    cl = MerchantClient(
-        client_id, client_secret
-    )  # , ihela_url="http://127.0.0.1:8080/")
-    print("\nBILL INIT : ", cl.ihela_base_url)
-
-    bill = cl.init_bill(
-        2000,
-        # "76077736",
-        "pierreclaverkoko@gmail.com",
-        "My description",
-        str(secrets.token_hex(10)),
-        # bank="MOB-0003"
-    )
-    print(bill)
-
-    if bill["bill"].get("merchant_reference"):
-        bill_verif = cl.verify_bill(
-            bill["bill"]["merchant_reference"], bill["bill"]["code"]
-        )
-
-        print("\nBILL VERIFY : ", bill_verif)
-
-    banks = cl.get_bank_list()
-
-    print("\nBANKS : ", banks)
-
-    client = cl.customer_lookup("MF1-0001", "000016-01")
-
-    print("\nCLIENT : ", client)
-
-    cashin = cl.cashin_client(
-        "MF1-0001", "000016-01", 20000, str(secrets.token_hex(10)), "Cashin description"
-    )
-
-    print("\nCASHIN : ", cashin)
+            return self.no_auth_response

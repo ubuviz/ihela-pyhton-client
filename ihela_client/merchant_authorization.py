@@ -7,7 +7,9 @@ info@ubuviz.com
 Python client for integration
 """
 
-import logging, json, string
+import json
+import logging
+import string
 import urllib.parse
 
 try:
@@ -33,10 +35,12 @@ iHela_ENDPOINTS = {
 }
 
 
-class MerchantAuthorizationClient(object):
+class MerchantAuthorizationClient:
     provider_name = "iHelá"
 
-    def __init__(self, client_id, client_secret, state=None, test=False, ihela_url=None):
+    def __init__(
+        self, client_id, client_secret, state=None, test=False, ihela_url=None
+    ):
         self.client_id = client_id
         self.client_secret = client_secret
         self.auth_token_object = None
@@ -68,7 +72,10 @@ class MerchantAuthorizationClient(object):
         if self.is_authenticated():
             return {
                 "Authorization": "%s %s"
-                % (self.auth_token_object["token_type"], self.auth_token_object["access_token"])
+                % (
+                    self.auth_token_object["token_type"],
+                    self.auth_token_object["access_token"],
+                )
             }
         return {}
 
@@ -82,7 +89,7 @@ class MerchantAuthorizationClient(object):
         if not self.state:
             self.state = "".join(secrets.choice(chars) for _ in range(20))
 
-        auth_dict = dict(
+        auth_dict = dict(  # noqa
             state=self.state,  # Generate Random
             response_type=response_type,
             client_id=self.client_id,
@@ -120,7 +127,9 @@ class MerchantAuthorizationClient(object):
         return auth_
 
     def is_authenticated(self):
-        if isinstance(self.auth_token_object, dict) and self.auth_token_object.get("access_token", None):
+        if isinstance(self.auth_token_object, dict) and self.auth_token_object.get(
+            "access_token", None
+        ):
             return True
         return False
 
@@ -151,7 +160,9 @@ class MerchantAuthorizationClient(object):
                 "redirect_uri": redirect_uri,
             }
             url = iHela_ENDPOINTS["BILL_INIT"]
-            bill_ = requests.post(self.get_url(url), data=bill_data, headers=self.get_auth_headers())
+            bill_ = requests.post(
+                self.get_url(url), data=bill_data, headers=self.get_auth_headers()
+            )
             bill_initiated = self.get_response(bill_)
 
             return bill_initiated
@@ -172,9 +183,11 @@ class MerchantAuthorizationClient(object):
 
 if __name__ == "__main__":
     client_id = "5Q3Ew1mQiZBd4UmI3W7LrfkJlLxA4T4lPIX3lnxx"
-    client_secret = "9btvRN7VUsZMyCNddn1Zx1rIEUnX7ITsCH3YqgWRxfA0Za7aVHA2mlKnEU9m5Y7en3wQoAMDWBOqJ8QYVfFYnJmM8BYCB5tO9NIrkUOtDmvB3rYD0QyEWEFIsafqfx2J"
+    client_secret = "9btvRN7VUsZMyCNddn1Zx1rIEUnX7ITsCH3YqgWRxfA0Za7aVHA2mlKnEU9m5Y7en3wQoAMDWBOqJ8QYVfFYnJmM8BYCB5tO9NIrkUOtDmvB3rYD0QyEWEFIsafqfx2J"  # noqa
 
-    cl = MerchantAuthorizationClient(client_id, client_secret, ihela_url="http://127.0.0.1:8080/")
+    cl = MerchantAuthorizationClient(
+        client_id, client_secret, ihela_url="http://127.0.0.1:8080/"
+    )
     url = cl.get_authorization_url("http://127.0.0.1:4040/")
 
     print(url)

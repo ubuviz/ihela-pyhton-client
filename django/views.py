@@ -1,8 +1,14 @@
-from ihela_client.client import Client as iHelaAPIClient
-from ihelaprovider.base import iHelaAdapter
-from allauth.socialaccount.providers.oauth2.views import OAuth2View
-from allauth.socialaccount.providers.oauth2.client import OAuth2Client, OAuth2Error
 from allauth.socialaccount.models import SocialLogin
+from allauth.socialaccount.providers.oauth2.views import OAuth2View
+
+from django.conf import settings
+from ihela_client.client import Client as iHelaAPIClient
+
+# from allauth.socialaccount.providers.oauth2.client import OAuth2Client, OAuth2Error
+# from ihelaprovider.base import iHelaAdapter
+
+
+TEST_ENV = False
 
 
 class iHelaClientBaseView(OAuth2View):
@@ -36,7 +42,7 @@ class iHelaClientBaseView(OAuth2View):
 
     @property
     def get_absolute_url(self):
-        return request.build_absolute_uri(self.request.path)
+        return self.request.build_absolute_uri(self.request.path)
 
 
 class iHelaClientCodeView(iHelaClientBaseView):
@@ -47,4 +53,6 @@ class iHelaClientCodeView(iHelaClientBaseView):
         return self.request.GET.get("error", None)
 
     def get_payment_object(self):
-        raise NotImplementedError("An iHelaClientCodeView child must have a method called `get_payment_object`.")
+        raise NotImplementedError(
+            "An iHelaClientCodeView child must have a method called `get_payment_object`."
+        )
