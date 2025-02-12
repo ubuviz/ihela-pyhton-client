@@ -6,7 +6,7 @@
 #
 build==0.10.0
     # via pip-tools
-certifi==2023.5.7
+certifi==2024.7.4
     # via requests
 cfgv==3.3.1
     # via pre-commit
@@ -43,7 +43,9 @@ requests==2.31.0
 simplejson==3.19.1
     # via -r requirements.in
 tomli==2.0.1
-    # via build
+    # via
+    #   build
+    #   pyproject-hooks
 urllib3==2.0.2
     # via requests
 virtualenv==20.23.0
