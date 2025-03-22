@@ -18,7 +18,7 @@ distlib==0.3.6
     # via virtualenv
 filelock==3.12.0
     # via virtualenv
-gunicorn==20.1.0
+gunicorn==23.0.0
     # via -r requirements.in
 identify==2.5.24
     # via pre-commit
@@ -27,7 +27,9 @@ idna==3.4
 nodeenv==1.8.0
     # via pre-commit
 packaging==23.1
-    # via build
+    # via
+    #   build
+    #   gunicorn
 pip-tools==6.13.0
     # via -r requirements.in
 platformdirs==3.5.1
@@ -43,7 +45,9 @@ requests==2.31.0
 simplejson==3.19.1
     # via -r requirements.in
 tomli==2.0.1
-    # via build
+    # via
+    #   build
+    #   pyproject-hooks
 urllib3==2.0.2
     # via requests
 virtualenv==20.23.0
